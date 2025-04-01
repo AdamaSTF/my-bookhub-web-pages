@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>myBookHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="menu">
+            <a href="#" onclick="showBooksByTheme('self-development')">Self Development</a>
+            <a href="#" onclick="showBooksByTheme('comics')">Comics</a>
+            <a href="#" onclick="showBooksByTheme('science')">Science</a>
+            <a href="#" onclick="showBooksByTheme('history')">History</a>
+            <a href="#" onclick="showBestSellers()">Bestsellers</a>
+            <a href="#" onclick="toggleContactUs()">Contact Us</a>
+            <a href="#sign-up-section" onclick="toggleSignUp()">Sign Up</a>
+            <a href="#login-section" onclick="toggleLogin()">Login</a>
+        </div>
+    </div>
+    
+    <img src="logo.png" alt="myBookHub Logo" class="logo">
+    <h1>Welcome to myBookHub</h1>
+
+    <!-- Sign Up Section -->
+    <section id="sign-up-section">
+        <h2>Create an Account</h2>
+        <form id="sign-up-form">
+            <label>Username:<input type="text" id="sign-up-username" required></label>
+            <label>Password:<input type="password" id="sign-up-password" required></label>
+            <button type="submit">Sign Up</button>
+        </form>
+    </section>
+
+    <!-- Login Section -->
+    <section id="login-section">
+        <h2>Login</h2>
+        <form id="login-form">
+            <label>Username:<input type="text" id="login-username" required></label>
+            <label>Password:<input type="password" id="login-password" required></label>
+            <button type="submit">Login</button>
+        </form>
+    </section>
+
+    <!-- Recommended Books Section -->
+    <h2 style="text-align: center; color: #007BFF;">Recommended Books</h2>
+    <div class="book-grid" id="recommendations"></div>
+
+    <!-- Contact Us Section - Hidden by default -->
+    <section id="contact" class="contact-section" style="display:none;">
+        <h2>Contact Us</h2>
+        <p>If you have any questions, feel free to reach out to us!</p>
+        <form class="contact-form">
+            <label>Name:<input type="text" placeholder="Your Name" required></label>
+            <label>Email:<input type="email" placeholder="Your Email" required></label>
+            <label>Message:<textarea placeholder="Your Message" required></textarea></label>
+            <button type="submit">Send Message</button>
+        </form>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>
