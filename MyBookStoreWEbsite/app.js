@@ -11,7 +11,7 @@ const books = [
     { title: "Spider-Man: Blue", author: "Jeph Loeb", genre: "comics", price: 6.99, language: "English", rating: 4.5, image: "https://m.media-amazon.com/images/I/81PHzU0nPpL._AC_UY327_FMwebp_QL65_.jpg", description: "A reflective love story of Peter Parker.", year: 2002 },
     { title: "Saga Vol. 1", author: "Brian K. Vaughan", genre: "comics", price: 7.49, language: "English", rating: 4.6, image: "https://m.media-amazon.com/images/I/61GZy1rKMEL._AC_UY327_FMwebp_QL65_.jpg", description: "A sci-fi fantasy comic about love and war.", year: 2012 },
 
-    { title: "A Brief History of Time", author: "Stephen Hawking", genre: "science", price: 10.99, language: "English", rating: 4.8, image: "https://m.media-amazon.com/images/I/81t2CVWEsUL.jpg", description: "Explore the universe.", year: 1988 },
+    { title: "A Brief History of Time", author: "Stephen Hawking", genre: "science", price: 10.99, language: "English", rating: 4.8, image: "https://m.media-amazon.com/images/I/81o5zZ5vRmL._AC_UY327_FMwebp_QL65_.jpg", description: "Explore the universe.", year: 1988 },
     { title: "Cosmos", author: "Carl Sagan", genre: "science", price: 9.99, language: "English", rating: 4.7, image: "https://m.media-amazon.com/images/I/916GmfmvbSL._AC_UY327_FMwebp_QL65_.jpg", description: "A journey through space.", year: 1980 },
     { title: "The Selfish Gene", author: "Richard Dawkins", genre: "science", price: 8.99, language: "English", rating: 4.6, image: "https://m.media-amazon.com/images/I/81CCtn4O7-L._AC_UY327_FMwebp_QL65_.jpg", description: "Evolution explained through gene-centered theory.", year: 1976 },
     { title: "The Gene", author: "Siddhartha Mukherjee", genre: "science", price: 11.49, language: "English", rating: 4.7, image: "https://m.media-amazon.com/images/I/81vpsIs58WL.jpg", description: "An intimate history of the gene.", year: 2016 },
@@ -22,12 +22,28 @@ function showSection(sectionId) {
     ['home', 'genres', 'bestsellers', 'contact', 'auth'].forEach(id => {
         document.getElementById(id).style.display = id === sectionId ? 'block' : 'none';
     });
+
     document.getElementById('home-secondary-nav').style.display = sectionId === 'home' ? 'flex' : 'none';
     document.getElementById('genres-secondary-nav').style.display = sectionId === 'genres' ? 'flex' : 'none';
-    if(sectionId === 'genres') displayBooks('genres');
-    if(sectionId === 'bestsellers') displayBooks('bestsellers');
-    if(sectionId === 'home') displayTopRatedBooks();
+
+    if (sectionId === 'genres') displayBooks('genres');
+    if (sectionId === 'bestsellers') displayBooks('bestsellers');
+    if (sectionId === 'home') displayTopRatedBooks();
+    if (sectionId === 'home') {
+        document.querySelector('h2.section-title').style.display = 'block';
+        document.getElementById('recommendations').style.display = 'grid';
+        document.getElementById('top-rated').style.display = 'grid';
+    } else {
+        document.querySelector('h2.section-title').style.display = 'none';
+        document.getElementById('recommendations').style.display = 'none';
+        document.getElementById('top-rated').style.display = 'none';
+    }
+    const homeTitles = document.querySelectorAll('#home h2.section-title');
+    homeTitles.forEach(title => {
+        title.style.display = sectionId === 'home' ? 'block' : 'none';
+    });
 }
+
 
 window.onload = function() {
     try {
@@ -109,28 +125,42 @@ function filterGenre(genre) {
     displayBooks(currentSection, filteredBooks);
 }
 
-function displayBooks(section, data = books) {
-    try {
-        const container = section === 'genres' ? document.getElementById('genres') : document.getElementById(section);
-        if (!container) {
-            console.error('Container not found for section:', section);
-            return;
-        }
-        
-        container.innerHTML = '';
-        const list = section === 'bestsellers' ? [...books].sort((a,b) => b.rating - a.rating) : data;
-        
-        list.forEach(book => {
-            const div = document.createElement('div');
-            div.className = 'book';
-            div.innerHTML = `<img src="${book.image}" alt="${book.title}"><h3>${book.title}</h3><p>${book.author}</p><p>£${book.price}</p><p>${book.description}</p>`;
-            div.onclick = () => expandBook(book);
-            container.appendChild(div);
-        });
-    } catch (error) {
-        console.error('Error displaying books:', error);
+function generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5 ? true : false;
+    let stars = '';
+
+    for (let i = 0; i < fullStars; i++) {
+        stars += '⭐';
     }
+    if (halfStar) {
+        stars += '☆'; 
+    }
+    return stars;
 }
+
+function displayBooks(section, data = books) {
+    let container;
+    if (section === 'genres') {
+        container = document.getElementById('genres-books');
+    } else if (section === 'bestsellers') {
+        container = document.getElementById('bestsellers-books');
+    } else {
+        container = document.getElementById(section);
+    }
+
+    container.innerHTML = '';
+    const list = section === 'bestsellers' ? [...books].sort((a, b) => b.rating - a.rating) : data;
+    list.forEach(book => {
+        const div = document.createElement('div');
+        div.className = 'book';
+        div.innerHTML = `<img src="${book.image}" alt="${book.title}"><h3>${book.title}</h3><p>${book.author}</p><p>£${book.price}</p><p>${book.description}</p>`;
+        div.onclick = () => expandBook(book);
+        container.appendChild(div);
+    });
+}
+
+
 
 function filterByPrice() {
     const maxPrice = parseFloat(document.getElementById('filterPrice').value);
@@ -174,26 +204,52 @@ function expandBook(book) {
 function showWishlist() {
     try {
         const currentUser = localStorage.getItem('currentUser');
+        const wishlistSection = document.getElementById('wishlist');
+        const userInfo = document.getElementById('user-info');
+        const welcomeMessage = document.getElementById('welcome-message');
+
         if (currentUser) {
+            welcomeMessage.textContent = `Hello, ${currentUser}`;
+            userInfo.style.display = 'block';
+
             const wishlist = JSON.parse(localStorage.getItem(currentUser + '_wishlist')) || [];
             const wishlistContainer = document.getElementById('wishlist-items');
             wishlistContainer.innerHTML = '';
-            wishlist.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                wishlistContainer.appendChild(li);
-            });
-            document.getElementById('wishlist').style.display = 'block';
+
+            if (wishlist.length === 0) {
+                wishlistContainer.innerHTML = '<p>Your wishlist is empty.</p>';
+            } else {
+                wishlist.forEach(title => {
+                    const book = books.find(b => b.title === title);
+                    if (book) {
+                        const div = document.createElement('div');
+                        div.className = 'wishlist-book';
+                        div.innerHTML = `
+                            <img src="${book.image}" alt="${book.title}" style="width:100px; height:auto; border-radius:5px;">
+                            <div class="wishlist-details">
+                                <h4>${book.title}</h4>
+                                <p>Author: ${book.author}</p>
+                                <p>£${book.price}</p>
+                                <p>Rating: ${book.rating} ⭐</p>
+                                <button onclick="removeFromWishlist('${book.title}')">Remove</button>
+                            </div>
+                        `;
+                        wishlistContainer.appendChild(div);
+                    }
+                });
+            }
+
+            wishlistSection.style.display = 'block';
+        } else {
+            userInfo.style.display = 'none';
+            wishlistSection.style.display = 'none';
         }
     } catch (error) {
         console.error('Error showing wishlist:', error);
     }
 }
 
-function logoutUser() {
-    localStorage.removeItem('currentUser');
-    location.reload();
-}
+
 
 function addToWishlist(title) {
     try {
@@ -211,6 +267,23 @@ function addToWishlist(title) {
     } catch (error) {
         console.error('Error adding to wishlist:', error);
     }
+}
+function removeFromWishlist(title) {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+        let wishlist = JSON.parse(localStorage.getItem(currentUser + '_wishlist')) || [];
+        wishlist = wishlist.filter(item => item !== title);
+        localStorage.setItem(currentUser + '_wishlist', JSON.stringify(wishlist));
+        alert(title + ' removed from your wishlist.');
+        showWishlist(); // Refresh wishlist display
+    }
+}
+
+function logoutUser() {
+    localStorage.removeItem('currentUser');
+    document.getElementById('wishlist').style.display = 'none';
+    document.getElementById('user-info').style.display = 'none';
+    location.reload();
 }
 
 function closeExpandedBook() {
