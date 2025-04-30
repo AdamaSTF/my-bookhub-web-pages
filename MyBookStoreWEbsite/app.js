@@ -45,6 +45,93 @@ function showSection(sectionId) {
 }
 
 
+function filterGenre(genre) {
+    const filteredBooks = books.filter(book => book.genre === genre);
+    const currentSection = document.getElementById('genres').style.display === 'block' ? 'genres' : 'recommendations';
+    displayBooks(currentSection, filteredBooks);
+}
+
+
+function displayBooks(section, data = books) {
+    let container;
+    if (section === 'genres') {
+        container = document.getElementById('genres-books');
+    } else if (section === 'bestsellers') {
+        container = document.getElementById('bestsellers-books');
+    } else {
+        container = document.getElementById(section);
+    }
+
+    container.innerHTML = '';
+    const list = section === 'bestsellers' ? [...books].sort((a, b) => b.rating - a.rating) : data;
+    list.forEach(book => {
+        const div = document.createElement('div');
+        div.className = 'book';
+        div.innerHTML = `<img src="${book.image}" alt="${book.title}"><h3>${book.title}</h3><p>${book.author}</p><p>£${book.price}</p><p>${book.description}</p>`;
+        div.onclick = () => expandBook(book);
+        container.appendChild(div);
+    });
+}
+
+
+
+function filterByPrice() {
+    const maxPrice = parseFloat(document.getElementById('filterPrice').value);
+    if (isNaN(maxPrice)) return;
+    const filteredBooks = books.filter(book => book.price <= maxPrice);
+    const currentSection = document.getElementById('genres').style.display === 'block' ? 'genres' : 'recommendations';
+    displayBooks(currentSection, filteredBooks);
+}
+
+function displayTopRatedBooks() {
+    const topBooks = [...books].sort((a,b) => b.rating - a.rating).slice(0, 6);
+    displayBooks('top-rated', topBooks);
+}
+function generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5 ? true : false;
+    let stars = '';
+
+    for (let i = 0; i < fullStars; i++) {
+        stars += '⭐';
+    }
+    if (halfStar) {
+        stars += '☆'; 
+    }
+    return stars;
+}
+
+function expandBook(book) {
+    try {
+        const overlay = document.getElementById('overlay');
+        const currentUser = localStorage.getItem('currentUser');
+        const wishlistButton = currentUser ? 
+            `<button onclick="addToWishlist('${book.title}')">Add to Wishlist</button>` : 
+            `<button onclick="alert('Please login to add to wishlist.')">Add to Wishlist</button>`;
+
+        overlay.innerHTML = `
+        <div class='expanded'>
+            <img src="${book.image}" alt="${book.title}">
+            <h3>${book.title}</h3>
+            <p>Author: ${book.author}</p>
+            <p>${book.description}</p>
+            <p>Year of Publication: ${book.year || 'Unknown'}</p>
+            <p>£${book.price}</p>
+            <p>${book.rating}⭐</p>
+            ${wishlistButton}
+            <button onclick="closeExpandedBook()">Close</button>
+        </div>`;
+        overlay.style.display = 'block';
+    } catch (error) {
+        console.error('Error expanding book:', error);
+    }
+}
+function closeExpandedBook() {
+    const overlay = document.getElementById('overlay');
+    overlay.style.display = 'none';
+    overlay.innerHTML = '';
+}
+
 window.onload = function() {
     try {
         const currentUser = localStorage.getItem('currentUser');
@@ -118,89 +205,6 @@ window.onload = function() {
         console.error('Error during page load:', error);
     }
 }
-
-function filterGenre(genre) {
-    const filteredBooks = books.filter(book => book.genre === genre);
-    const currentSection = document.getElementById('genres').style.display === 'block' ? 'genres' : 'recommendations';
-    displayBooks(currentSection, filteredBooks);
-}
-
-function generateStars(rating) {
-    const fullStars = Math.floor(rating);
-    const halfStar = rating % 1 >= 0.5 ? true : false;
-    let stars = '';
-
-    for (let i = 0; i < fullStars; i++) {
-        stars += '⭐';
-    }
-    if (halfStar) {
-        stars += '☆'; 
-    }
-    return stars;
-}
-
-function displayBooks(section, data = books) {
-    let container;
-    if (section === 'genres') {
-        container = document.getElementById('genres-books');
-    } else if (section === 'bestsellers') {
-        container = document.getElementById('bestsellers-books');
-    } else {
-        container = document.getElementById(section);
-    }
-
-    container.innerHTML = '';
-    const list = section === 'bestsellers' ? [...books].sort((a, b) => b.rating - a.rating) : data;
-    list.forEach(book => {
-        const div = document.createElement('div');
-        div.className = 'book';
-        div.innerHTML = `<img src="${book.image}" alt="${book.title}"><h3>${book.title}</h3><p>${book.author}</p><p>£${book.price}</p><p>${book.description}</p>`;
-        div.onclick = () => expandBook(book);
-        container.appendChild(div);
-    });
-}
-
-
-
-function filterByPrice() {
-    const maxPrice = parseFloat(document.getElementById('filterPrice').value);
-    if (isNaN(maxPrice)) return;
-    const filteredBooks = books.filter(book => book.price <= maxPrice);
-    const currentSection = document.getElementById('genres').style.display === 'block' ? 'genres' : 'recommendations';
-    displayBooks(currentSection, filteredBooks);
-}
-
-function displayTopRatedBooks() {
-    const topBooks = [...books].sort((a,b) => b.rating - a.rating).slice(0, 6);
-    displayBooks('top-rated', topBooks);
-}
-
-function expandBook(book) {
-    try {
-        const overlay = document.getElementById('overlay');
-        const currentUser = localStorage.getItem('currentUser');
-        const wishlistButton = currentUser ? 
-            `<button onclick="addToWishlist('${book.title}')">Add to Wishlist</button>` : 
-            `<button onclick="alert('Please login to add to wishlist.')">Add to Wishlist</button>`;
-
-        overlay.innerHTML = `
-        <div class='expanded'>
-            <img src="${book.image}" alt="${book.title}">
-            <h3>${book.title}</h3>
-            <p>Author: ${book.author}</p>
-            <p>${book.description}</p>
-            <p>Year of Publication: ${book.year || 'Unknown'}</p>
-            <p>£${book.price}</p>
-            <p>${book.rating}⭐</p>
-            ${wishlistButton}
-            <button onclick="closeExpandedBook()">Close</button>
-        </div>`;
-        overlay.style.display = 'block';
-    } catch (error) {
-        console.error('Error expanding book:', error);
-    }
-}
-
 function showWishlist() {
     try {
         const currentUser = localStorage.getItem('currentUser');
@@ -248,8 +252,12 @@ function showWishlist() {
         console.error('Error showing wishlist:', error);
     }
 }
-
-
+function logoutUser() {
+    localStorage.removeItem('currentUser');
+    document.getElementById('wishlist').style.display = 'none';
+    document.getElementById('user-info').style.display = 'none';
+    location.reload();
+}
 
 function addToWishlist(title) {
     try {
@@ -275,19 +283,7 @@ function removeFromWishlist(title) {
         wishlist = wishlist.filter(item => item !== title);
         localStorage.setItem(currentUser + '_wishlist', JSON.stringify(wishlist));
         alert(title + ' removed from your wishlist.');
-        showWishlist(); // Refresh wishlist display
+        showWishlist(); 
     }
 }
 
-function logoutUser() {
-    localStorage.removeItem('currentUser');
-    document.getElementById('wishlist').style.display = 'none';
-    document.getElementById('user-info').style.display = 'none';
-    location.reload();
-}
-
-function closeExpandedBook() {
-    const overlay = document.getElementById('overlay');
-    overlay.style.display = 'none';
-    overlay.innerHTML = '';
-}
